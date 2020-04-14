@@ -1,0 +1,35 @@
+<div *ngIf="!loggedIn">
+  LOGIN!
+
+  <form name="userform" method="post" #formCtrl="ngForm">
+
+    <div class="form-group">
+      <label for="exampleInputEmail1">Email address</label>
+      <input type="email" name="email" class="form-control" [(ngModel)]="email" placeholder="Email" required>
+    </div>
+    <div class="form-group">
+      <label for="exampleInputPassword1">Password</label>
+      <input type="password" name="password" class="form-control" [(ngModel)]="password" placeholder="Password"
+        required>
+    </div>
+
+    <button type="button" class="btn" (click)="logIn()" [disabled]="formCtrl.form.invalid">
+      Log in
+    </button>
+
+    <button type="button" class="btn" (click)="signUp()" [disabled]="formCtrl.form.invalid">
+      Sign Up
+    </button>
+
+    <button type="button" class="btn" (click)="forgotPassword()" [disabled]="email.length < 4">
+      Forgot password
+    </button>
+  </form>
+
+  <div *ngIf="processing"> Processing ... </div>
+  <div *ngIf="error">
+    ERROR: {{error}}
+    <button type="button" (click)="confirmError()">Just great.</button>
+  </div>
+
+</div>

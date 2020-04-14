@@ -3,6 +3,12 @@
 A minimal web-based online clipboard. In case you have multiple machines you have to work on - and at least one of them is in a VPN, so none of the local IP solution works.
 Angular frontend with Firebase as backend.
 
+## The project has two main components:
+
+### 1. The frontend, a angular web app
+
+### 2. simple cloud functions and rules
+
 
 # Stuff that Angular wrote. Good stuff. ⤵
 
