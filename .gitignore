@@ -1,2 +1,6 @@
 node_modules
 .DS_STORE
+.firebaserc
+src/environments/environment.myfirebase.ts
+src/environments/firebaseConfig.prod.ts
+src/environments/firebaseConfig.ts

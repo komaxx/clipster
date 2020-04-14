@@ -1,10 +1,10 @@
 # Clipster
 
 A minimal web-based online clipboard. In case you have multiple machines you have to work on - and at least one of them is in a VPN, so none of the local IP solution works.
-Uses Firebase as backend.
+Angular frontend with Firebase as backend.
 
 
-# Stuff that Angular wrote. Good stuff.
+# Stuff that Angular wrote. Good stuff. ⤵
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.1.
 
