@@ -8,12 +8,12 @@ export const pingPong = functions.https.onRequest((request, response) => {
 
 export const createDataStructuresForNewUser = functions.region('europe-west3')
     .auth.user().onCreate((user, context) => {
+        const userRootDoc = admin.firestore().collection('clipz').doc(user.uid)
 
-        return admin
-            .firestore().collection('clipz').doc(user.uid)
-            .set({
-                userEmail: user.email
-            });
+        const createRootDocPromise = userRootDoc.set({ userEmail: user.email });
+        const createFirstClipPromise = userRootDoc.collection('clipz').add({ text: "testText Clip 1" });
+
+        return createRootDocPromise.then(() => createFirstClipPromise);
     });
 
 export const deleteDataForDeletedUser = functions.region('europe-west3')

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
-import { Clipz } from './clipboard';
 import { AngularFireAuth } from '@angular/fire/auth';
 
 import { auth } from 'firebase';

@@ -1,4 +1,13 @@
 <div *ngIf="user !== null">
-  Logged in as {{user.email}}
-  <button (click)="logOut()">Logout</button>
+  <div class="header">
+    Logged in as {{user.email}}
+    <button (click)="logOut()">Logout</button>
+    <button (click)="deleteAccount()">Delete Account</button>
+  </div>
+
+  <div *ngIf="clipz !== null">
+    <div *ngFor="let clip of clipz">
+      {{clip.text}} | {{clip.time?.toDate()}}
+    </div>
+  </div>
 </div>
