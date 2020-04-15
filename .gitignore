@@ -5,3 +5,4 @@ src/environments/firebaseConfig.prod.ts
 src/environments/firebaseConfig.ts
 frontend/src/environments/firebaseConfig.prod.ts
 frontend/src/environments/firebaseConfig.ts
+frontend/dist
