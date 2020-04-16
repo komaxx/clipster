@@ -55,7 +55,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.error = null;
     this.processing = true;
     this.fireAuth.sendPasswordResetEmail(this.email)
-      .then(() => { this.snackBar.open('We\'ve sent an email to your spam folder.', null, { duration: 2000 }); })
+      .then(() => {
+        this.snackBar.open('We\'ve sent an email to your spam folder.', null, { duration: 4000 });
+      })
       .catch((error) => this.error = error)
       .finally(() => this.processing = false);
   }
