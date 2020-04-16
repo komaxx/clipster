@@ -7,7 +7,7 @@ Angular frontend with Firebase as backend.
 
 ### 1. The frontend, a angular web app
 
-### 2. simple cloud functions and rules
+### 2. simple cloud functions and firestore rules
 
 
 # Stuff that Angular wrote. Good stuff. ⤵

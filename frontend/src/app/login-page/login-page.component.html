@@ -1,35 +1,40 @@
-<div *ngIf="!loggedIn">
-  LOGIN!
+<div class="loginPage" *ngIf="!loggedIn">
 
-  <form name="userform" method="post" #formCtrl="ngForm">
+  <!-- Input card -->
+  <mat-card>
+    <mat-card-content>
+      <form name="userform" method="post" #formCtrl="ngForm">
+        <mat-form-field>
+          <mat-label>Email</mat-label>
+          <input type="email" name="email" matInput [(ngModel)]="email">
+        </mat-form-field>
 
-    <div class="form-group">
-      <label for="exampleInputEmail1">Email address</label>
-      <input type="email" name="email" class="form-control" [(ngModel)]="email" placeholder="Email" required>
-    </div>
-    <div class="form-group">
-      <label for="exampleInputPassword1">Password</label>
-      <input type="password" name="password" class="form-control" [(ngModel)]="password" placeholder="Password"
-        required>
-    </div>
+        <mat-form-field>
+          <mat-label>Password</mat-label>
+          <input type="password" name="password" matInput [(ngModel)]="password">
+        </mat-form-field>
 
-    <button type="button" class="btn" (click)="logIn()" [disabled]="formCtrl.form.invalid">
-      Log in
-    </button>
+        <button class="forgotButton" mat-outlined-button (click)="forgotPassword()">Forgot :(</button>
 
-    <button type="button" class="btn" (click)="signUp()" [disabled]="formCtrl.form.invalid">
-      Sign Up
-    </button>
+        <button class="login-signup-button" color="primary" mat-flat-button (click)="logIn()"
+          cdkFocusInitial>Login</button>
+        <button class="login-signup-button" color="accent" mat-flat-button (click)="signUp()">Sign Up</button>
 
-    <button type="button" class="btn" (click)="forgotPassword()" [disabled]="email.length < 4">
-      Forgot password
-    </button>
-  </form>
+      </form>
+    </mat-card-content>
+  </mat-card>
 
-  <div *ngIf="processing"> Processing ... </div>
-  <div *ngIf="error">
+  <!-- Processing overlay -->
+
+  <div class="processing" *ngIf="processing">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div class="error" *ngIf="error">
     ERROR: {{error}}
     <button type="button" (click)="confirmError()">Just great.</button>
   </div>
 
 </div>
+
+<div class="background-logo mdc-theme--primary" *ngIf="!loggedIn">CLIPZ</div>

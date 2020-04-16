@@ -1,0 +1,68 @@
+.loginPage {
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: lightgrey;
+    align-items: center;
+    justify-content: center;
+}
+
+.background-logo {
+    position: absolute;
+    font-size: 350px;
+    margin-top: 250px;
+    font-weight: 900;
+
+    color: rgba($color: #999, $alpha: 0.2);
+}
+
+mat-card {
+    width: 320px;
+    padding: 30px;
+    z-index: 1;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+input {
+    flex-grow: 1;
+    font-size: 28px;
+}
+
+.login-signup-button {
+    margin-top: 10px;
+    font-size: 20px;
+    padding: 10px;
+}
+
+.forgotButton {
+    flex-wrap: 0;
+    align-self: flex-end;
+    transform: translateY(-1.2em);
+}
+
+.processing {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: rgba($color: #fff, $alpha: 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.error {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    background-color: $clipster-primary;
+}

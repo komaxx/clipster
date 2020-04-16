@@ -1,9 +1,16 @@
-<div *ngIf="user !== null">
-  <div class="header">
-    Logged in as {{user.email}}
-    <button (click)="logOut()">Logout</button>
-    <button (click)="deleteAccount()">Delete Account</button>
-  </div>
+<div class="mat-app-background" *ngIf="user !== null">
+  <mat-toolbar>
+    <span>Clipz</span>
+    <span class="flex-spacer"></span>
+    <span class="logged-in-as">Logged in as &nbsp;</span>
+    <span class="email">{{user.email}}</span>
+    <button matTooltip="Logout" class="header-button" mat-raised-button (click)="logOut()">
+      👋 Logout
+    </button>
+    <button matTooltip="Delete account" class="header-button" mat-raised-button (click)="deleteAccount()">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </mat-toolbar>
 
   <div *ngIf="clipz !== null">
     <div *ngFor="let clip of clipz">

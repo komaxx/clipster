@@ -6,6 +6,8 @@ import { TextClip } from '../clipz';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import * as firebase from 'firebase';
+import { MatDialog } from '@angular/material/dialog';
+import { DeleteAccountDialogComponent } from './delete-account-dialog/delete-account-dialog.component';
 
 
 @Component({
@@ -20,7 +22,10 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
   private userSubscription: Subscription | null = null;
   private clipzSubscription: Subscription | null = null;
 
-  constructor(private fireAuth: AngularFireAuth, private firestore: AngularFirestore) { }
+  constructor(
+    private fireAuth: AngularFireAuth,
+    private firestore: AngularFirestore,
+    public dialog: MatDialog) { }
 
   ngOnInit() {
     this.subscribeToData();
@@ -84,6 +89,6 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
   }
 
   deleteAccount() {
-    this.user.delete();
+    this.dialog.open(DeleteAccountDialogComponent);
   }
 }

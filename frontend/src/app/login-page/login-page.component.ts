@@ -1,10 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { Subscription } from 'rxjs';
-import { FormBuilder } from '@angular/forms';
-import { FormControl } from '@angular/forms';
-import { FormGroup } from '@angular/forms';
-import { User, auth } from 'firebase';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 
 @Component({
   selector: 'app-login-page',
@@ -14,15 +12,17 @@ import { User, auth } from 'firebase';
 export class LoginPageComponent implements OnInit, OnDestroy {
   loggedIn = false;
 
-  email = 'my@email.de';
+  email = 'e@mailtest.de';
   password = 'password';
 
   processing = false;
-  error = null;
+  error = 'someone farted in a super stinky way';
 
   private userSubscription: Subscription = null;
 
-  constructor(private fireAuth: AngularFireAuth) { }
+  constructor(
+    private snackBar: MatSnackBar,
+    private fireAuth: AngularFireAuth) { }
 
   ngOnInit() {
     this.userSubscription = this.fireAuth.user.subscribe((user) => this.loggedIn = user !== null);
@@ -33,7 +33,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   logIn() {
-    console.log('logging in...');
+    this.error = null;
     this.processing = true;
 
     this.fireAuth.signInWithEmailAndPassword(this.email, this.password)
@@ -43,6 +43,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   signUp() {
+    this.error = null;
     this.processing = true;
     this.fireAuth.createUserWithEmailAndPassword(this.email, this.password)
       .then((user) => console.log('user created :)', user))
@@ -51,7 +52,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   }
 
   forgotPassword() {
-
+    this.error = null;
+    this.processing = true;
+    this.fireAuth.sendPasswordResetEmail(this.email)
+      .then(() => { this.snackBar.open('We\'ve sent an email to your spam folder.', null, { duration: 2000 }); })
+      .catch((error) => this.error = error)
+      .finally(() => this.processing = false);
   }
 
   confirmError() {
