@@ -1,13 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { User } from 'firebase';
-import { TextClip } from '../clipz';
+import { Clip } from '../clipz';
 
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFirestore } from '@angular/fire/firestore';
 import * as firebase from 'firebase';
 import { MatDialog } from '@angular/material/dialog';
 import { DeleteAccountDialogComponent } from './delete-account-dialog/delete-account-dialog.component';
+import { AngularFireDatabase } from '@angular/fire/database';
 
 
 @Component({
@@ -17,7 +18,7 @@ import { DeleteAccountDialogComponent } from './delete-account-dialog/delete-acc
 })
 export class ClipzPageComponent implements OnInit, OnDestroy {
   user: User | null = null;
-  clipz: TextClip[] = [];
+  clipz: Clip[] = [];
 
   private userSubscription: Subscription | null = null;
   private clipzSubscription: Subscription | null = null;
@@ -25,6 +26,7 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
   constructor(
     private fireAuth: AngularFireAuth,
     private firestore: AngularFirestore,
+    private firebaseDb: AngularFireDatabase,
     public dialog: MatDialog) { }
 
   ngOnInit() {
@@ -51,11 +53,17 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const timeStamp = firebase.firestore.FieldValue.serverTimestamp();
-    this.firestore.collection('clipz').doc(userId).collection('clipz').add({
-      text,
-      time: timeStamp
-    });
+    const timeStamp = firebase.database.ServerValue.TIMESTAMP;
+    this.firebaseDb.list(`/clipz/${userId}/clipz`).push({ text: text, time: timeStamp });
+
+
+
+
+    // const timeStamp = firebase.firestore.FieldValue.serverTimestamp();
+    // this.firestore.collection('clipz').doc(userId).collection('clipz').add({
+    //   text,
+    //   time: timeStamp
+    // });
   }
 
   private subscribeToData() {
@@ -64,17 +72,35 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
       this.clipzSubscription?.unsubscribe();
 
       const userId = this.user?.uid;
+
       if (userId) {
-        this.clipzSubscription = this.firestore.collection('clipz').doc(userId).collection('clipz').valueChanges()
-          .subscribe((docs) => {
-            const clips = docs.map((doc) => doc as TextClip);
-            const sortedClips = clips.sort((a, b) => {
-              const aTime = a.time?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-              const bTime = b.time?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-              return bTime - aTime;
+
+
+
+        this.clipzSubscription = this.firebaseDb
+          .list(`/clipz/${userId}/clipz`).snapshotChanges()
+          .subscribe((data) => {
+            const nuClipz = data.map((entry) => {
+              const clipData = entry.payload.val();
+              const clip: Clip = { id: entry.key, text: clipData['text'], time: clipData['time'] };
+              return clip;
             });
-            this.clipz = sortedClips;
+
+            this.clipz = nuClipz;
           });
+
+        // this.clipzSubscription = this.firestore
+        //   .collection('clipz').doc(userId).collection('clipz')
+        //   .valueChanges({ idField: 'id' })
+        //   .subscribe((docs) => {
+        //     const clips = docs.map((doc) => doc as Clip);
+        //     const sortedClips = clips.sort((a, b) => {
+        //       const aTime = a.time?.toMillis() ?? Number.MAX_SAFE_INTEGER;
+        //       const bTime = b.time?.toMillis() ?? Number.MAX_SAFE_INTEGER;
+        //       return bTime - aTime;
+        //     });
+        //     this.clipz = sortedClips;
+        //   });
       }
     });
   }

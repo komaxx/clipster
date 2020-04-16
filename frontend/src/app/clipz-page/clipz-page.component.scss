@@ -10,4 +10,38 @@
 
 .header-button {
     margin-left: 10px;
+    font-size: 20px;
+}
+
+.clipz-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.clipz-list {
+    display: flex;
+    flex-direction: column;
+    width: 900px;
+    margin: 30px;
+}
+
+.explanation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #666;
+}
+
+.explanation-row {
+    font-size: xx-large;
+    line-height: 3em;
+}
+
+.key {
+    display: inline;
+    background-color: #bbb;
+    border-radius: 5px;
+    box-shadow: 0px 8px 0px 0px #999;
+    padding: 0.3em 1em;
 }

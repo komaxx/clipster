@@ -1,20 +1,31 @@
-<div class="mat-app-background" *ngIf="user !== null">
+<div *ngIf="user !== null">
   <mat-toolbar>
     <span>Clipz</span>
     <span class="flex-spacer"></span>
     <span class="logged-in-as">Logged in as &nbsp;</span>
     <span class="email">{{user.email}}</span>
     <button matTooltip="Logout" class="header-button" mat-raised-button (click)="logOut()">
-      👋 Logout
+      👋
     </button>
     <button matTooltip="Delete account" class="header-button" mat-raised-button (click)="deleteAccount()">
-      <mat-icon>delete</mat-icon>
+      ☠️
     </button>
   </mat-toolbar>
 
-  <div *ngIf="clipz !== null">
-    <div *ngFor="let clip of clipz">
-      {{clip.text}} | {{clip.time?.toDate()}}
+  <div class="clipz-container" *ngIf="clipz !== null">
+    <div class="clipz-list">
+      <app-clip *ngFor="let clip of clipz" [clip]="clip"></app-clip>
+    </div>
+
+    <div class="explanation" *ngIf="clipz.length < 1">
+      <div>Add by pasting</div>
+      <div class="explanation-row">
+        <span class="key">⌘</span> + <span class="key">V</span>
+      </div>
+      <div>or</div>
+      <div class="explanation-row">
+        <span class="key">Ctrl</span> + <span class="key">V</span>
+      </div>
     </div>
   </div>
 </div>

@@ -1,6 +1,5 @@
 <h1 mat-dialog-title>Delete account?</h1>
 <div mat-dialog-content>
-  <p class="explanation">Only works with yout password. Enter it now.</p>
   <mat-form-field>
     <mat-label>Password</mat-label>
     <input matInput [(ngModel)]="password">
@@ -11,5 +10,5 @@
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="cancel()" cdkFocusInitial>Cancel</button>
-  <button mat-button color="warn" (click)="deleteNow()">Delete now</button>
+  <button mat-button color="warn" (click)="deleteNow()">Delete account</button>
 </div>

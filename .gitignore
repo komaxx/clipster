@@ -7,3 +7,4 @@ frontend/src/environments/firebaseConfig.prod.ts
 frontend/src/environments/firebaseConfig.ts
 frontend/dist
 cloud_functions/firebase-debug.log
+.vscode/launch.json

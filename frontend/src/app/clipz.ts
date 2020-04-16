@@ -1,6 +1,9 @@
 import { firestore } from 'firebase';
 
-export interface TextClip {
+export interface Clip {
+    id: string;
     text: string;
-    time: firestore.Timestamp;
+
+    // time is missing right after creation until successful syncing with the server
+    time: string | null;
 }

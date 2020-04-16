@@ -1,0 +1,5 @@
+<div class="date">
+  <span *ngIf="clip.time != null">{{clip.time | timeAgo }}</span>
+  <button class="delete-button" mat-icon-button (click)="delete($event)"> ⌫ </button>
+</div>
+<div class="text">{{clip.text}}</div>

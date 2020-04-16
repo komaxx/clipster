@@ -14,7 +14,6 @@
     margin-top: 120px;
     margin-left: -20px;
     font-weight: 900;
-
     color: rgba($color: #999, $alpha: 0.2);
 }
 
@@ -44,6 +43,12 @@ input {
     flex-wrap: 0;
     align-self: flex-end;
     transform: translateY(-1.2em);
+    background-color: rgba($color: #999, $alpha: 0.2);
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+    padding: 3px 10px;
 }
 
 .processing {
