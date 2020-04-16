@@ -12,11 +12,11 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class LoginPageComponent implements OnInit, OnDestroy {
   loggedIn = false;
 
-  email = 'e@mailtest.de';
-  password = 'password';
+  email = '';
+  password = '';
 
   processing = false;
-  error = 'someone farted in a super stinky way';
+  error = null;
 
   private userSubscription: Subscription = null;
 

@@ -31,8 +31,11 @@
   </div>
 
   <div class="error" *ngIf="error">
-    ERROR: {{error}}
-    <button type="button" (click)="confirmError()">Just great.</button>
+    <div class="content">
+      <div class="title">&gt;_&lt;</div>
+      <div class="message">{{error}}</div>
+      <button color="primary" mat-raised-button type="button" (click)="confirmError()">Just great.</button>
+    </div>
   </div>
 
 </div>
