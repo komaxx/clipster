@@ -1,0 +1,20 @@
+<div class="top-line">
+  <div class="text">
+    <span class="failed" *ngIf="upload.status==='failed'">⚠ FAILED</span>
+    <span class="finished" *ngIf="upload.status==='finished'">✓ COMPLETE</span>
+
+    <span class="uploadingIcon" *ngIf="upload.status==='uploading'">⟳</span>
+    <span class="uploading" *ngIf="upload.status==='uploading'"> UPLOADING</span>
+    {{upload.fileName}}
+  </div>
+
+  <button mat-icon-button (click)="cancel()">
+    <mat-icon>X</mat-icon>
+  </button>
+</div>
+<div class="failed" *ngIf="upload.status==='failed'">{{upload.error}}</div>
+
+<div class="bottom-line not-started-line" *ngIf="upload.status==='initial'"></div>
+<mat-progress-bar *ngIf="upload.status==='uploading'" mode="determinate" value="{{upload.progress}}"></mat-progress-bar>
+<div class="bottom-line failed-line" *ngIf="upload.status==='failed'"></div>
+<div class="bottom-line finished-line" *ngIf="upload.status==='finished'"></div>

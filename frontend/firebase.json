@@ -11,18 +11,20 @@
         "source": "**",
         "destination": "/index.html"
       }
-    ]
-  },
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "emulators": {
-    "firestore": {
-      "port": 8080
-    },
-    "hosting": {
-      "port": 5000
-    }
+    ],
+    "headers": [
+      {
+        "source": "**/*.*",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          }
+        ]
+      }
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "appAssociation": "AUTO"
   }
 }

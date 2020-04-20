@@ -1,9 +1,9 @@
-<div *ngIf="user !== null">
+<div *ngIf="clipsService.user !== null">
   <mat-toolbar>
     <span>Clipz</span>
     <span class="flex-spacer"></span>
     <span class="logged-in-as">Logged in as &nbsp;</span>
-    <span class="email">{{user.email}}</span>
+    <span class="email">{{ clipsService.user.email}}</span>
     <button matTooltip="Logout" class="header-button" mat-raised-button (click)="logOut()">
       👋
     </button>
@@ -13,8 +13,13 @@
   </mat-toolbar>
 
   <div class="clipz-container" *ngIf="clipz !== null">
+    <div class="drag-overlay" (drop)="onDrop($event)" (dragover)="onDragOver($event)"></div>
     <div class="clipz-list">
-      <app-clip *ngFor="let clip of clipz" [clip]="clip"></app-clip>
+      <app-upload *ngFor="let upload of clipsService.uploads" [upload]="upload">
+      </app-upload>
+
+      <app-clip *ngFor="let clip of clipz" [clip]="clip">
+      </app-clip>
     </div>
 
     <div class="explanation" *ngIf="clipz.length < 1">

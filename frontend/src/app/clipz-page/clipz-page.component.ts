@@ -1,14 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { User } from 'firebase';
-import { Clip } from '../clipz';
-
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore } from '@angular/fire/firestore';
-import * as firebase from 'firebase';
 import { MatDialog } from '@angular/material/dialog';
+import { Subscription } from 'rxjs';
+import { Clip } from './clipz';
+import { ClipzService } from './clipz.service';
 import { DeleteAccountDialogComponent } from './delete-account-dialog/delete-account-dialog.component';
-import { AngularFireDatabase } from '@angular/fire/database';
+
 
 
 @Component({
@@ -17,16 +14,13 @@ import { AngularFireDatabase } from '@angular/fire/database';
   styleUrls: ['./clipz-page.component.scss']
 })
 export class ClipzPageComponent implements OnInit, OnDestroy {
-  user: User | null = null;
   clipz: Clip[] = [];
 
-  private userSubscription: Subscription | null = null;
-  private clipzSubscription: Subscription | null = null;
+  clipSubscription: Subscription | null = null;
 
   constructor(
+    public clipsService: ClipzService,
     private fireAuth: AngularFireAuth,
-    private firestore: AngularFirestore,
-    private firebaseDb: AngularFireDatabase,
     public dialog: MatDialog) { }
 
   ngOnInit() {
@@ -35,79 +29,38 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
   }
 
   private registerForPasteEvents() {
-    document.addEventListener('paste', (event) => {
-      console.log(event);
-
-      const text = event.clipboardData.getData('Text');
-      this.uploadNewTextClip(text);
-
+    document.addEventListener('paste', async (event) => {
       event.preventDefault();
       event.stopPropagation();
+
+      this.clipsService.createClipForPasteEvent(event);
     });
   }
 
-  private uploadNewTextClip(text: string) {
-    const userId = this.user?.uid;
-    if (!userId) {
-      // not logged in
-      return;
-    }
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
 
-    const timeStamp = firebase.database.ServerValue.TIMESTAMP;
-    this.firebaseDb.list(`/clipz/${userId}/clipz`).push({ text: text, time: timeStamp });
+    console.log('as string:', event.dataTransfer.getData('text/plain'));
 
+    this.clipsService.createClipForDropEvent(event);
+  }
 
-
-
-    // const timeStamp = firebase.firestore.FieldValue.serverTimestamp();
-    // this.firestore.collection('clipz').doc(userId).collection('clipz').add({
-    //   text,
-    //   time: timeStamp
-    // });
+  onDragOver(event: DragEvent) {
+    // required to make dropping happen
+    event.dataTransfer.dropEffect = 'move';
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   private subscribeToData() {
-    this.userSubscription = this.fireAuth.user.subscribe((user) => {
-      this.user = user;
-      this.clipzSubscription?.unsubscribe();
-
-      const userId = this.user?.uid;
-
-      if (userId) {
-
-
-
-        this.clipzSubscription = this.firebaseDb
-          .list(`/clipz/${userId}/clipz`).snapshotChanges()
-          .subscribe((data) => {
-            const nuClipz = data.map((entry) => {
-              const clipData = entry.payload.val();
-              const clip: Clip = { id: entry.key, text: clipData['text'], time: clipData['time'] };
-              return clip;
-            });
-
-            this.clipz = nuClipz;
-          });
-
-        // this.clipzSubscription = this.firestore
-        //   .collection('clipz').doc(userId).collection('clipz')
-        //   .valueChanges({ idField: 'id' })
-        //   .subscribe((docs) => {
-        //     const clips = docs.map((doc) => doc as Clip);
-        //     const sortedClips = clips.sort((a, b) => {
-        //       const aTime = a.time?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-        //       const bTime = b.time?.toMillis() ?? Number.MAX_SAFE_INTEGER;
-        //       return bTime - aTime;
-        //     });
-        //     this.clipz = sortedClips;
-        //   });
-      }
-    });
+    this.clipSubscription = this.clipsService.clipz.subscribe(
+      (clipz) => this.clipz = clipz
+    );
   }
 
   ngOnDestroy(): void {
-    this.userSubscription?.unsubscribe();
-    this.clipzSubscription?.unsubscribe();
+    this.clipSubscription?.unsubscribe();
   }
 
   logOut() {

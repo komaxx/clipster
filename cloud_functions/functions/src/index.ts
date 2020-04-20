@@ -9,16 +9,33 @@ admin.initializeApp();
 export const createDataStructuresForNewUser = functions.region('europe-west3')
     .auth.user().onCreate(async (user, context) => {
         // firebase
-        // const firstClip = await admin.database().ref(`clipz/${user.uid}/clipz`).push()
-        // await firstClip.set({ text: "Welcome Firebase", time: admin.database.ServerValue.TIMESTAMP });
+        // at this point: Nothing. Data handling is mostly done by the frontent.
 
-        // // firestore
-        // const userRootDoc = admin.firestore().collection('clipz').doc(user.uid)
-        // await userRootDoc.set({ userEmail: user.email });
-        // await userRootDoc.collection('clipz').add({ text: "Welcome! Nice that you're here :)", time: admin.database.ServerValue.TIMESTAMP });
+        // Nice-to-haves: Welcome email?
     });
 
 export const deleteDataForDeletedUser = functions.region('europe-west3')
     .auth.user().onDelete(async (user, context) => {
+        // database
         await admin.database().ref(`clipz/${user.uid}`).remove();
     });
+
+export const deleteFileOnClipDelete = functions.region('europe-west3')
+    .database.ref('clipz/{userUID}/clipz/{clipId}')
+    .onDelete(async (snapshot, context) => {
+        const clipLinkedFileName = snapshot.val().file;
+        if (!clipLinkedFileName) { return; }
+
+        const fileLocation = `${context.auth?.uid}/flz/${clipLinkedFileName}`
+
+        try {
+            const bucket = admin.storage().bucket();
+            const file = bucket.file(fileLocation)
+            console.log('deleting ... file/bucket', fileLocation, bucket);
+            await file.delete();
+            console.log(`DELETED!`);
+        } catch (error) {
+            console.error('delete failed!', error)
+        }
+    });
+

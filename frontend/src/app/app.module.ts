@@ -4,7 +4,7 @@ import { NgModule, Pipe } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AngularFireModule } from '@angular/fire';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { AngularFireStorageModule } from '@angular/fire/storage';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { firebaseConfig } from 'src/environments/firebaseConfig';
 import { MaterialElementsModule } from './material-elements.module';
@@ -17,6 +17,7 @@ import { LoginPageComponent } from './login-page/login-page.component';
 import { ClipzPageComponent } from './clipz-page/clipz-page.component';
 import { DeleteAccountDialogComponent } from './clipz-page/delete-account-dialog/delete-account-dialog.component';
 import { ClipComponent } from './clipz-page/clip/clip.component';
+import { UploadComponent } from './clipz-page/upload/upload.component';
 
 
 // Super ugly hack to get TimeAgoPipe running on Angular 9
@@ -34,6 +35,7 @@ export class TimeAgoExtendsPipe extends TimeAgoPipe { }
       ClipzPageComponent,
       DeleteAccountDialogComponent,
       ClipComponent,
+      UploadComponent,
       TimeAgoExtendsPipe
    ],
    imports: [
@@ -42,7 +44,7 @@ export class TimeAgoExtendsPipe extends TimeAgoPipe { }
       FormsModule,
       AngularFireModule.initializeApp(firebaseConfig),
       AngularFireDatabaseModule,
-      AngularFirestoreModule,
+      AngularFireStorageModule,
       BrowserAnimationsModule,
       MaterialElementsModule
    ],
