@@ -1,6 +1,7 @@
 <div class="top-line">
   <div class="text">
     <span class="failed" *ngIf="upload.status==='failed'">⚠ FAILED</span>
+    <span class="canceled" *ngIf="upload.status==='canceled'">✕ CANCELED</span>
     <span class="finished" *ngIf="upload.status==='finished'">✓ COMPLETE</span>
 
     <span class="uploadingIcon" *ngIf="upload.status==='uploading'">⟳</span>
@@ -8,8 +9,11 @@
     {{upload.fileName}}
   </div>
 
-  <button mat-icon-button (click)="cancel()">
-    <mat-icon>X</mat-icon>
+  <button mat-icon-button (click)="cancel()" *ngIf="upload.status==='uploading'">
+    ✕
+  </button>
+  <button mat-raised-button (click)="acknowledge()" *ngIf="upload.status!=='uploading'">
+    OK
   </button>
 </div>
 <div class="failed" *ngIf="upload.status==='failed'">{{upload.error}}</div>

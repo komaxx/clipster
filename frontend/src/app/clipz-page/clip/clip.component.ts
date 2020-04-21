@@ -3,7 +3,7 @@ import { Component, HostBinding, HostListener, Input, OnInit } from '@angular/co
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Clip } from 'src/app/clipz-page/clipz';
+import { Clip } from 'src/app/clipz-page/clip';
 
 @Component({
   selector: 'app-clip',
@@ -65,7 +65,12 @@ export class ClipComponent implements OnInit {
     document.execCommand('copy');
     document.body.removeChild(selBox);
 
-    this.snackBar.open('Copied to clipboard!', null, { duration: 1200 });
+    let shortCopied = this.clip.text.substring(0, 25);
+    if (this.clip.text.length > 25) {
+      shortCopied += '[..]';
+    }
+
+    this.snackBar.open(`Copied text to clipboard:   ${shortCopied}`, null, { duration: 1200 });
 
     setTimeout(() => this.animationState = 'live', 60);
   }
@@ -83,5 +88,23 @@ export class ClipComponent implements OnInit {
     } catch (e) {
       this.snackBar.open(`Deletion failed :'( ${e}`);
     }
+  }
+
+  async download(event) {
+    event.stopPropagation();
+
+    const a = document.createElement('a');
+    a.href = await this.toDataURL(this.clip.file);
+    a.download = this.clip.text;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+
+  private async toDataURL(url: string) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
   }
 }

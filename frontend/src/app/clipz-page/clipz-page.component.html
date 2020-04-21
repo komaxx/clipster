@@ -1,5 +1,5 @@
 <div *ngIf="clipsService.user !== null">
-  <mat-toolbar>
+  <mat-toolbar color="primary">
     <span>Clipz</span>
     <span class="flex-spacer"></span>
     <span class="logged-in-as">Logged in as &nbsp;</span>
@@ -12,9 +12,11 @@
     </button>
   </mat-toolbar>
 
-  <div class="clipz-container" *ngIf="clipz !== null">
-    <div class="drag-overlay" (drop)="onDrop($event)" (dragover)="onDragOver($event)"></div>
-    <div class="clipz-list">
+  <div class="main-columns">
+    <!-- CLIPZ -->
+    <div class="clips-container" *ngIf="clipz !== null">
+      <div class="no-clips-yet" *ngIf="clipz.length < 1">Nothing yet...</div>
+
       <app-upload *ngFor="let upload of clipsService.uploads" [upload]="upload">
       </app-upload>
 
@@ -22,14 +24,16 @@
       </app-clip>
     </div>
 
-    <div class="explanation" *ngIf="clipz.length < 1">
-      <div>Add by pasting</div>
-      <div class="explanation-row">
+    <!-- RIGHT COLUMN -->
+    <div class="right-row-container">
+      <div>Add text by pasting</div>
+      <div>
         <span class="key">⌘</span> + <span class="key">V</span>
       </div>
       <div>or</div>
-      <div class="explanation-row">
-        <span class="key">Ctrl</span> + <span class="key">V</span>
+
+      <div class="drag-drop-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
+        Drop files here
       </div>
     </div>
   </div>

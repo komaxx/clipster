@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ClipUpload } from '../clip-upload';
 import { ClipzService } from '../clipz.service';
 
@@ -7,19 +7,18 @@ import { ClipzService } from '../clipz.service';
   templateUrl: './upload.component.html',
   styleUrls: ['./upload.component.scss']
 })
-export class UploadComponent implements OnInit {
-
+export class UploadComponent {
   @Input()
   upload: ClipUpload;
 
   constructor(private clipzService: ClipzService) {
   }
 
-  ngOnInit() {
-    console.log('init', this.upload);
-  }
-
   cancel() {
     this.clipzService.cancel(this.upload);
+  }
+
+  acknowledge() {
+    this.clipzService.acknowledge(this.upload);
   }
 }

@@ -1,11 +1,16 @@
-<div class="date">
-  <span *ngIf="clip.time != null">{{clip.time | timeAgo }}</span>
-  <button class="delete-button" mat-icon-button (click)="delete($event)"> ⌫ </button>
+<div class="top-row">
+  <div class="spacer"></div>
+  <div class="date">
+    <span *ngIf="clip.time !== null">{{clip.time | timeAgo }}</span>
+    <button class="delete-button" mat-icon-button (click)="delete($event)"> ⌫ </button>
+  </div>
 </div>
 
-<div *ngIf="!clipIsLink" class="text">{{clip.text}}</div>
+<div *ngIf="!clipIsLink" class="text" [innerHTML]="clip.text"></div>
 <div *ngIf="clipIsLink" class="text">
   <a href="{{clip.text}}" target="blank">{{clip.text}} ⧉</a>
 </div>
 
-<div class="text">{{clip.file}}</div>
+<button *ngIf="clip.file != null" class="download-button" mat-raised-button color="accent" (click)="download($event)">
+  <i class="material-icons">arrow_downward</i>
+</button>

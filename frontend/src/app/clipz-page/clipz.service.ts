@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFireDatabase } from '@angular/fire/database';
 import * as firebase from 'firebase';
-import { Observable, of, interval } from 'rxjs';
-import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { Observable, of, interval, timer } from 'rxjs';
+import { map, shareReplay, switchMap, tap, take } from 'rxjs/operators';
 import { ClipUpload } from './clip-upload';
-import { Clip } from './clipz';
+import { Clip } from './clip';
 import { AngularFireStorage } from '@angular/fire/storage';
 
 
@@ -23,29 +23,6 @@ export class ClipzService {
     private fireAuth: AngularFireAuth,
     private fireStorage: AngularFireStorage,
     private firebaseDb: AngularFireDatabase) {
-
-
-    this.uploads = [
-      new ClipUpload('File1'),
-      new ClipUpload('File2'),
-    ];
-
-    interval(250).subscribe(
-      () => {
-        this.uploads[0].progress = new Date().getMilliseconds() * 3 % 100;
-        this.uploads[1].progress = new Date().getMilliseconds() * 5 % 100;
-      }
-    );
-
-    setTimeout(() => {
-      this.uploads[0].status = 'uploading';
-      this.uploads[1].status = 'uploading';
-    }, 1000);
-
-    setTimeout(() => {
-      this.uploads[0].status = 'failed';
-      this.uploads[1].status = 'finished';
-    }, 4000);
 
     this.clipz = fireAuth.user.pipe(
       switchMap((user) => {
@@ -67,12 +44,28 @@ export class ClipzService {
     ) as Observable<Clip[]>;
   }
 
-  cancel(upload: ClipUpload) {
+  /**
+   * Abort a running upload. No-op if not uploading.
+   */
+  public cancel(upload: ClipUpload) {
     if (upload.status !== 'uploading') {
       return;
     }
     upload.task?.cancel();
-    upload.status = 'failed';
+    upload.status = 'canceled';
+  }
+
+  /**
+   * Remove a finished upload. No-op if not yet finished
+   */
+  public acknowledge(toAck: ClipUpload) {
+    if (toAck.status === 'uploading' || toAck.status === 'initial') {
+      return;
+    }
+
+    // not really required. But better be safe.
+    toAck.task?.cancel();
+    this.uploads = this.uploads.filter((up) => up !== toAck);
   }
 
 
@@ -84,8 +77,11 @@ export class ClipzService {
       const clipData = entry.payload.val();
       const clip: Clip = {
         id: entry.key,
+        // tslint:disable-next-line: no-string-literal
         text: clipData['text'],
+        // tslint:disable-next-line: no-string-literal
         time: clipData['time'],
+        // tslint:disable-next-line: no-string-literal
         file: clipData['file']
       };
       return clip;
@@ -126,8 +122,11 @@ export class ClipzService {
 
     if (event.clipboardData.files.length < 1) {
       // simple text pasting
-      const text = event.clipboardData.getData('Text');
-      this.createClip(userId, text);
+      const text = event.clipboardData.getData('text/plain');
+      // const storedHtmlFileName = await this.uploadClipAsHtml(event, userId);
+      const storedHtmlFileName = null;
+
+      this.createClip(userId, text, storedHtmlFileName);
       return;
     }
 
@@ -137,9 +136,27 @@ export class ClipzService {
     }
   }
 
-  async createClipForDropEvent(event: DragEvent) {
-    console.log('files', event.dataTransfer.files);
 
+  // TODO: Later on, copy the formatted text as well!
+  //
+  // private async uploadClipAsHtml(event: ClipboardEvent, userId: string): Promise<string | null> {
+  //   const plainText = event.clipboardData.getData('text/plain');
+  //   const htmlText = event.clipboardData.getData('text/html');
+  //   if (htmlText?.length < 1) { return null; }
+
+  //   try {
+  //     const storageFileName = `snippet_${(new Date()).getMilliseconds()}_${btoa(plainText).substring(0, 15)}.html`;
+  //     const storeRef = this.fireStorage.ref(`${userId}/flz/${storageFileName}`);
+  //     await storeRef.putString(htmlText).then();
+  //     return storageFileName;
+  //   } catch (e) {
+  //     console.error('Upload as html failed. Will be posted without html.', e);
+
+  //     return null;
+  //   }
+  // }
+
+  async createClipForDropEvent(event: DragEvent) {
     const userId = (await this.fireAuth.currentUser).uid;
     if (!userId) {
       // not logged in. Ignore.
@@ -160,14 +177,10 @@ export class ClipzService {
   }
 
   private async upload(file: File, userId: string) {
-    console.log('pasting FILE ...', file);
-
     const clipUpload = new ClipUpload(file.name);
     this.uploads.push(clipUpload);
 
     const storageFileName = this.sanitizedFileName(file);
-    console.log('storage fileName', storageFileName);
-
     clipUpload.status = 'uploading';
 
     try {
@@ -176,14 +189,13 @@ export class ClipzService {
       clipUpload.task = upload;
 
       upload.percentageChanges().subscribe((percentage) => clipUpload.progress = percentage);
-      await upload.then((dataSnapshot) => console.log('DONE!')).catch((error) => console.error(error));
-
-      console.log('upload complete! Create clip..');
+      await upload.then((_) => console.log('DONE!')).catch((error) => console.error(error));
 
       const shownText = file.name;
-      await this.createClip(userId, shownText, storageFileName);
-
+      const downloadUrl: string = (await (await upload).ref.getDownloadURL()) as string;
+      await this.createClip(userId, shownText, downloadUrl);
       clipUpload.status = 'finished';
+      this.acknowledge(clipUpload);
     } catch (e) {
       console.error('upload failed :(', e);
       clipUpload.status = 'failed';
@@ -191,6 +203,8 @@ export class ClipzService {
 
       return;
     }
+
+    // setTimeout(() => this.acknowledge(clipUpload), 50);
   }
 
   private sanitizedFileName(file: File): string {
@@ -199,10 +213,11 @@ export class ClipzService {
     return `${(new Date()).getMilliseconds()}_${fileName}`;
   }
 
-  private async createClip(userId: string, text: string, storageFileName?: string | null) {
+  private async createClip(userId: string, text: string, storageFileName?: string | null): Promise<firebase.database.Reference> {
     const timeStamp = firebase.database.ServerValue.TIMESTAMP;
-    await this.firebaseDb
+    const reference = await this.firebaseDb
       .list(`/clipz/${userId}/clipz`)
       .push({ text, time: timeStamp, file: storageFileName ?? null });
+    return reference;
   }
 }
