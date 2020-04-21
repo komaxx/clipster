@@ -193,9 +193,12 @@ export class ClipzService {
 
       const shownText = file.name;
       const downloadUrl: string = (await (await upload).ref.getDownloadURL()) as string;
-      await this.createClip(userId, shownText, downloadUrl);
-      clipUpload.status = 'finished';
-      this.acknowledge(clipUpload);
+      await this.createClip(userId, shownText, storageFileName, downloadUrl);
+
+      this.uploads = this.uploads.filter((up) => up !== clipUpload);
+
+      // clipUpload.status = 'finished';
+      // this.acknowledge(clipUpload);
     } catch (e) {
       console.error('upload failed :(', e);
       clipUpload.status = 'failed';
@@ -203,8 +206,6 @@ export class ClipzService {
 
       return;
     }
-
-    // setTimeout(() => this.acknowledge(clipUpload), 50);
   }
 
   private sanitizedFileName(file: File): string {
@@ -213,11 +214,16 @@ export class ClipzService {
     return `${(new Date()).getMilliseconds()}_${fileName}`;
   }
 
-  private async createClip(userId: string, text: string, storageFileName?: string | null): Promise<firebase.database.Reference> {
+  private async createClip(
+    userId: string,
+    text: string,
+    fileName?: string | null,
+    downloadUrl?: string | null): Promise<firebase.database.Reference> {
+
     const timeStamp = firebase.database.ServerValue.TIMESTAMP;
     const reference = await this.firebaseDb
       .list(`/clipz/${userId}/clipz`)
-      .push({ text, time: timeStamp, file: storageFileName ?? null });
+      .push({ text, time: timeStamp, file: downloadUrl ?? null, fileName });
     return reference;
   }
 }

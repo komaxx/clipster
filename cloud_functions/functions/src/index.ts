@@ -9,7 +9,7 @@ admin.initializeApp();
 export const createDataStructuresForNewUser = functions.region('europe-west3')
     .auth.user().onCreate(async (user, context) => {
         // firebase
-        // at this point: Nothing. Data handling is mostly done by the frontent.
+        // at this point: Nothing. Data handling is mostly done by the frontend.
 
         // Nice-to-haves: Welcome email?
     });
@@ -20,10 +20,11 @@ export const deleteDataForDeletedUser = functions.region('europe-west3')
         await admin.database().ref(`clipz/${user.uid}`).remove();
     });
 
+
 export const deleteFileOnClipDelete = functions.region('europe-west3')
     .database.ref('clipz/{userUID}/clipz/{clipId}')
     .onDelete(async (snapshot, context) => {
-        const clipLinkedFileName = snapshot.val().file;
+        const clipLinkedFileName = snapshot.val().fileName;
         if (!clipLinkedFileName) { return; }
 
         const fileLocation = `${context.auth?.uid}/flz/${clipLinkedFileName}`

@@ -101,7 +101,6 @@ export class ClipComponent implements OnInit {
     document.body.removeChild(a);
   }
 
-
   private async toDataURL(url: string) {
     const response = await fetch(url);
     const blob = await response.blob();
