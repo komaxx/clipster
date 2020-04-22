@@ -11,6 +11,8 @@
   <a href="{{clip.text}}" target="blank">{{clip.text}} ⧉</a>
 </div>
 
-<button *ngIf="clip.file != null" class="download-button" mat-raised-button color="accent" (click)="download($event)">
-  <i class="material-icons">arrow_downward</i>
+<button *ngIf="clip.file != null" [disabled]="downloading" class="download-button" mat-raised-button color="accent"
+  (click)="download($event)">
+  <i *ngIf="!downloading" class="material-icons">arrow_downward</i>
+  <span *ngIf="downloading"> Loading...</span>
 </button>

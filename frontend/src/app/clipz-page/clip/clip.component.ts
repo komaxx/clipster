@@ -4,6 +4,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Clip } from 'src/app/clipz-page/clip';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-clip',
@@ -29,6 +30,8 @@ export class ClipComponent implements OnInit {
 
   @Input()
   clip: Clip;
+
+  downloading = false;
 
   get clipIsLink(): boolean {
     try {
@@ -93,12 +96,16 @@ export class ClipComponent implements OnInit {
   async download(event) {
     event.stopPropagation();
 
+    this.downloading = true;
+
     const a = document.createElement('a');
     a.href = await this.toDataURL(this.clip.file);
     a.download = this.clip.text;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+
+    this.downloading = false;
   }
 
   private async toDataURL(url: string) {
