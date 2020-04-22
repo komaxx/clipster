@@ -73,7 +73,7 @@ Please! Suggestions, PRs, issues: All welcome!
 #### That code could be cleaner
 Yes. Needed this tool quickly, so wrote it quickly. Also, I'm more of a native guy, so I'm probably using some of the web tech wrong.
 
-#### Why didn't you use <insert your shtick here>?
+#### Why didn't you use [insert your shtick here]?
 Probably should have. Just used the tools at hand.
 
 #### License?
