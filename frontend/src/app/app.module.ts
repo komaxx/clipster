@@ -18,6 +18,7 @@ import { ClipzPageComponent } from './clipz-page/clipz-page.component';
 import { DeleteAccountDialogComponent } from './clipz-page/delete-account-dialog/delete-account-dialog.component';
 import { ClipComponent } from './clipz-page/clip/clip.component';
 import { UploadComponent } from './clipz-page/upload/upload.component';
+import { InitiatingComponent } from './initiating/initiating.component';
 
 
 // Super ugly hack to get TimeAgoPipe running on Angular 9
@@ -36,7 +37,8 @@ export class TimeAgoExtendsPipe extends TimeAgoPipe { }
       DeleteAccountDialogComponent,
       ClipComponent,
       UploadComponent,
-      TimeAgoExtendsPipe
+      TimeAgoExtendsPipe,
+      InitiatingComponent
    ],
    imports: [
       BrowserModule,

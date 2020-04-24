@@ -137,7 +137,7 @@ export class ClipzService {
   }
 
 
-  // TODO: Later on, copy the formatted text as well!
+  // TODO: Later on, copy the formatted text as well! Shows up as html text
   //
   // private async uploadClipAsHtml(event: ClipboardEvent, userId: string): Promise<string | null> {
   //   const plainText = event.clipboardData.getData('text/plain');

@@ -17,6 +17,7 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
   clipz: Clip[] = [];
 
   clipSubscription: Subscription | null = null;
+  firstLoadComplete = false;
 
   constructor(
     public clipsService: ClipzService,
@@ -55,7 +56,10 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
 
   private subscribeToData() {
     this.clipSubscription = this.clipsService.clipz.subscribe(
-      (clipz) => this.clipz = clipz
+      (clipz) => {
+        this.firstLoadComplete = true;
+        this.clipz = clipz;
+      }
     );
   }
 

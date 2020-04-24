@@ -15,7 +15,13 @@
   <div class="main-columns">
     <!-- CLIPZ -->
     <div class="clips-container" *ngIf="clipz !== null">
-      <div class="no-clips-yet" *ngIf="clipz.length < 1">Nothing yet...</div>
+      <div *ngIf="!firstLoadComplete">
+        <div class="empty-clips-message">Syncing...</div>
+      </div>
+
+      <div *ngIf="firstLoadComplete && clipz.length < 1">
+        <div class="empty-clips-message">Nothing yet...</div>
+      </div>
 
       <app-upload *ngFor="let upload of clipsService.uploads" [upload]="upload">
       </app-upload>
