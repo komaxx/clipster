@@ -183,6 +183,8 @@ export class ClipzService {
     const storageFileName = this.sanitizedFileName(file);
     clipUpload.status = 'uploading';
 
+    const previewFile = this.createPreview(file);
+
     try {
       const storeRef = this.fireStorage.ref(`${userId}/flz/${storageFileName}`);
       const upload = storeRef.put(file, {});
@@ -206,6 +208,71 @@ export class ClipzService {
 
       return;
     }
+  }
+
+  private async createPreview(file: File): Promise<string> | null {
+
+    console.log('Creating preview for ', file);
+
+    if (!file.type.startsWith('image/')) {
+      // Can only do images so far.
+      return null;
+    }
+
+    if (file.size > 30 * 1024 * 1024) {
+      // Don't process too large images. IE will just crash, proper browsers take forever
+      return null;
+    }
+
+    let srcDataUrl = null;
+    try {
+      srcDataUrl = await this.readSourceAsDataURL(file);
+    } catch (e) {
+      console.log('Could not read source as data URL. Not appending preview');
+      return null;
+    }
+    console.log('srcDataUrl read!');
+
+    const image = new Image();
+    image.src = srcDataUrl;
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    canvas.width = 200;
+    canvas.height = 200;
+
+    context.drawImage(image, 0, 0, 200, 200);
+
+    return canvas.toDataURL('image/jpg', 70);
+  }
+
+  private async readSourceAsDataURL(file: File): Promise<string> {
+
+    console.log('Reading file source');
+
+    const reader = new FileReader();
+
+    return new Promise(
+      (resolve, reject) => {
+        reader.onerror = () => {
+
+          console.log('ERROR');
+
+          reject('Couldn\'t read file');
+          reader.abort();
+        };
+
+        reader.onload = () => {
+
+          console.log('SUCCESS');
+
+          resolve(reader.result as string);
+        };
+
+        reader.readAsDataURL(file);
+      }
+    );
   }
 
   private sanitizedFileName(file: File): string {
