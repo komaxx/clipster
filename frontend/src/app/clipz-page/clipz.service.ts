@@ -184,6 +184,7 @@ export class ClipzService {
     clipUpload.status = 'uploading';
 
     const previewFile = this.createPreview(file);
+    console.log('previewFile:', previewFile);
 
     try {
       const storeRef = this.fireStorage.ref(`${userId}/flz/${storageFileName}`);
@@ -191,7 +192,7 @@ export class ClipzService {
       clipUpload.task = upload;
 
       upload.percentageChanges().subscribe((percentage) => clipUpload.progress = percentage);
-      await upload.then((_) => console.log('DONE!')).catch((error) => console.error(error));
+      await upload.then((_) => console.log('upload complete')).catch((error) => console.error(error));
 
       const shownText = file.name;
       const downloadUrl: string = (await (await upload).ref.getDownloadURL()) as string;
@@ -211,9 +212,6 @@ export class ClipzService {
   }
 
   private async createPreview(file: File): Promise<string> | null {
-
-    console.log('Creating preview for ', file);
-
     if (!file.type.startsWith('image/')) {
       // Can only do images so far.
       return null;
@@ -231,7 +229,6 @@ export class ClipzService {
       console.log('Could not read source as data URL. Not appending preview');
       return null;
     }
-    console.log('srcDataUrl read!');
 
     const image = new Image();
     image.src = srcDataUrl;
@@ -248,25 +245,17 @@ export class ClipzService {
   }
 
   private async readSourceAsDataURL(file: File): Promise<string> {
-
-    console.log('Reading file source');
-
     const reader = new FileReader();
 
     return new Promise(
       (resolve, reject) => {
         reader.onerror = () => {
-
           console.log('ERROR');
-
           reject('Couldn\'t read file');
           reader.abort();
         };
 
         reader.onload = () => {
-
-          console.log('SUCCESS');
-
           resolve(reader.result as string);
         };
 
@@ -275,12 +264,18 @@ export class ClipzService {
     );
   }
 
+  /**
+   * Create a string that can be used to store the file in Firebase from a file.
+   */
   private sanitizedFileName(file: File): string {
     // TODO: This is probably not fine.
     const fileName = file.name;
     return `${(new Date()).getMilliseconds()}_${fileName}`;
   }
 
+  /**
+   * Take all the given data and dump it into Firebase to make a new clip
+   */
   private async createClip(
     userId: string,
     text: string,
