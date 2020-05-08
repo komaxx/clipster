@@ -111,6 +111,16 @@ export class ClipzService {
   // //////////////////////////////////////////////////////////////////////
   // pasting
 
+  async createClipForText(toPaste: string) {
+    const userId = (await this.fireAuth.currentUser).uid;
+    if (!userId) {
+      // not logged in. Ignore.
+      return;
+    }
+    this.createClip(userId, toPaste);
+  }
+
+
   async createClipForPasteEvent(event: ClipboardEvent) {
     console.log('files', event.clipboardData.files);
 
@@ -285,7 +295,7 @@ export class ClipzService {
     const timeStamp = firebase.database.ServerValue.TIMESTAMP;
     const reference = await this.firebaseDb
       .list(`/clipz/${userId}/clipz`)
-      .push({ text, time: timeStamp, file: downloadUrl ?? null, fileName });
+      .push({ text, time: timeStamp, file: downloadUrl ?? null, fileName: fileName ?? null });
     return reference;
   }
 }

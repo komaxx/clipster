@@ -19,6 +19,9 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
   clipSubscription: Subscription | null = null;
   firstLoadComplete = false;
 
+  inputText = '';
+  inputIsFocused = false;
+
   constructor(
     public clipsService: ClipzService,
     private fireAuth: AngularFireAuth,
@@ -31,11 +34,30 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
 
   private registerForPasteEvents() {
     document.addEventListener('paste', async (event) => {
+      if (this.inputIsFocused) {
+        return;
+      }
       event.preventDefault();
       event.stopPropagation();
 
       this.clipsService.createClipForPasteEvent(event);
     });
+  }
+
+  inputFocused() {
+    this.inputIsFocused = true;
+  }
+
+  inputFocusLost() {
+    this.inputIsFocused = false;
+  }
+
+  pasteFromInputBox() {
+    const toPaste = this.inputText.trim();
+    if (toPaste.length < 1) {
+      return;
+    }
+    this.clipsService.createClipForText(toPaste);
   }
 
   onDrop(event: DragEvent) {

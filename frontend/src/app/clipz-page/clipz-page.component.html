@@ -32,10 +32,16 @@
 
     <!-- RIGHT COLUMN -->
     <div class="right-row-container">
-      <div>Add text by pasting</div>
+      <div>Add</div>
       <div>
         <span class="key">⌘</span> + <span class="key">V</span>
       </div>
+      <div>or</div>
+
+      <textarea class="text-input" rows="5" type="text" name="txt" (focus)="inputFocused()"
+        (focusout)="inputFocusLost()" placeholder="fill me" [(ngModel)]="inputText"></textarea>
+      <button class="input-paste-button" color="primary" mat-flat-button (click)="pasteFromInputBox()">Paste</button>
+
       <div>or</div>
 
       <div class="drag-drop-box" (drop)="onDrop($event)" (dragover)="onDragOver($event)">
