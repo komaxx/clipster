@@ -8,6 +8,9 @@ import { ClipUpload } from './clip-upload';
 import { Clip } from './clip';
 import { AngularFireStorage } from '@angular/fire/storage';
 
+const previewWidth = 100;
+const previewHeight = 100;
+
 
 @Injectable({
   providedIn: 'root'
@@ -79,6 +82,8 @@ export class ClipzService {
         id: entry.key,
         // tslint:disable-next-line: no-string-literal
         text: clipData['text'],
+        // tslint:disable-next-line: no-string-literal
+        previewFileUrlString: clipData['previewFileUrlString'],
         // tslint:disable-next-line: no-string-literal
         time: clipData['time'],
         // tslint:disable-next-line: no-string-literal
@@ -193,8 +198,7 @@ export class ClipzService {
     const storageFileName = this.sanitizedFileName(file);
     clipUpload.status = 'uploading';
 
-    const previewFile = this.createPreview(file);
-    console.log('previewFile:', previewFile);
+    const previewFileUrl = await this.createPreviewUrl(file);
 
     try {
       const storeRef = this.fireStorage.ref(`${userId}/flz/${storageFileName}`);
@@ -206,7 +210,7 @@ export class ClipzService {
 
       const shownText = file.name;
       const downloadUrl: string = (await (await upload).ref.getDownloadURL()) as string;
-      await this.createClip(userId, shownText, storageFileName, downloadUrl);
+      await this.createClip(userId, shownText, previewFileUrl, storageFileName, downloadUrl);
 
       this.uploads = this.uploads.filter((up) => up !== clipUpload);
 
@@ -221,7 +225,7 @@ export class ClipzService {
     }
   }
 
-  private async createPreview(file: File): Promise<string> | null {
+  private async createPreviewUrl(file: File): Promise<string> | null {
     if (!file.type.startsWith('image/')) {
       // Can only do images so far.
       return null;
@@ -241,17 +245,46 @@ export class ClipzService {
     }
 
     const image = new Image();
-    image.src = srcDataUrl;
+    await this.loadImage(image, srcDataUrl);
+
 
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
+    canvas.width = previewWidth;
+    canvas.height = previewHeight;
 
-    canvas.width = 200;
-    canvas.height = 200;
+    const canvasAspectRatio = previewHeight / previewHeight;
+    const imageAspectRatio = image.width / image.height;
+    let xOffset = 0;
+    let yOffset = 0;
+    if (imageAspectRatio > canvasAspectRatio) {
+      const scaleFactor = image.height / canvas.height;
+      const scaledWidth = image.width / scaleFactor;
+      xOffset = (scaledWidth - previewWidth) / 2;
+    } else {
+      const scaleFactor = image.width / canvas.width;
+      const scaledHeight = image.height / scaleFactor;
+      yOffset = (scaledHeight - previewHeight) / 2;
+    }
 
-    context.drawImage(image, 0, 0, 200, 200);
-
+    context.drawImage(image, -xOffset, -yOffset,
+      previewWidth + 2 * xOffset, previewHeight + 2 * yOffset);
     return canvas.toDataURL('image/jpg', 70);
+  }
+
+  private async loadImage(image: HTMLImageElement, srcDataUrl: any) {
+    image.src = srcDataUrl;
+
+    return new Promise(
+      (resolve, reject) => {
+        image.onload = () => {
+          resolve();
+        };
+        image.onerror = () => {
+          reject();
+        };
+      }
+    );
   }
 
   private async readSourceAsDataURL(file: File): Promise<string> {
@@ -289,13 +322,14 @@ export class ClipzService {
   private async createClip(
     userId: string,
     text: string,
+    previewFileUrlString?: string | null,
     fileName?: string | null,
     downloadUrl?: string | null): Promise<firebase.database.Reference> {
 
     const timeStamp = firebase.database.ServerValue.TIMESTAMP;
     const reference = await this.firebaseDb
       .list(`/clipz/${userId}/clipz`)
-      .push({ text, time: timeStamp, file: downloadUrl ?? null, fileName: fileName ?? null });
+      .push({ text, time: timeStamp, previewFileUrlString, file: downloadUrl ?? null, fileName: fileName ?? null });
     return reference;
   }
 }

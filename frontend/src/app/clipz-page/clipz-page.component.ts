@@ -64,7 +64,7 @@ export class ClipzPageComponent implements OnInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
 
-    console.log('as string:', event.dataTransfer.getData('text/plain'));
+    console.log('as string:', event.dataTransfer?.getData('text/plain'));
 
     this.clipsService.createClipForDropEvent(event);
   }

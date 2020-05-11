@@ -1,3 +1,4 @@
+<!-- Top row -->
 <div class="top-row">
   <div class="spacer"></div>
   <div class="date">
@@ -6,11 +7,17 @@
   </div>
 </div>
 
+<!-- content line  -->
 <div *ngIf="!clipIsLink" class="text" [innerHTML]="clip.text"></div>
 <div *ngIf="clipIsLink" class="text">
   <a href="{{clip.text}}" target="blank">{{clip.text}} ⧉</a>
 </div>
 
+<div *ngIf="clip.previewFileUrlString !== null">
+  <img src="{{clip.previewFileUrlString}}" alt="" width="100px" height="100px">
+</div>
+
+<!-- downloading footer -->
 <button *ngIf="clip.file != null" [disabled]="downloading" class="download-button" mat-raised-button color="accent"
   (click)="download($event)">
   <i *ngIf="!downloading" class="material-icons">arrow_downward</i>
