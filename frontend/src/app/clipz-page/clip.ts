@@ -7,6 +7,8 @@ export interface Clip {
 
     file: string | null;
 
+    previewFileUrlString: string | null;
+
     // time is missing right after creation until successful syncing with the server
     time: string | null;
 }

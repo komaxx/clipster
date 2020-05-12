@@ -8,6 +8,9 @@ import { ClipUpload } from './clip-upload';
 import { Clip } from './clip';
 import { AngularFireStorage } from '@angular/fire/storage';
 
+const previewWidth = 100;
+const previewHeight = 100;
+
 
 @Injectable({
   providedIn: 'root'
@@ -80,6 +83,8 @@ export class ClipzService {
         // tslint:disable-next-line: no-string-literal
         text: clipData['text'],
         // tslint:disable-next-line: no-string-literal
+        previewFileUrlString: clipData['previewFileUrlString'],
+        // tslint:disable-next-line: no-string-literal
         time: clipData['time'],
         // tslint:disable-next-line: no-string-literal
         file: clipData['file']
@@ -110,6 +115,16 @@ export class ClipzService {
 
   // //////////////////////////////////////////////////////////////////////
   // pasting
+
+  async createClipForText(toPaste: string) {
+    const userId = (await this.fireAuth.currentUser).uid;
+    if (!userId) {
+      // not logged in. Ignore.
+      return;
+    }
+    this.createClip(userId, toPaste);
+  }
+
 
   async createClipForPasteEvent(event: ClipboardEvent) {
     console.log('files', event.clipboardData.files);
@@ -183,17 +198,19 @@ export class ClipzService {
     const storageFileName = this.sanitizedFileName(file);
     clipUpload.status = 'uploading';
 
+    const previewFileUrl = await this.createPreviewUrl(file);
+
     try {
       const storeRef = this.fireStorage.ref(`${userId}/flz/${storageFileName}`);
       const upload = storeRef.put(file, {});
       clipUpload.task = upload;
 
       upload.percentageChanges().subscribe((percentage) => clipUpload.progress = percentage);
-      await upload.then((_) => console.log('DONE!')).catch((error) => console.error(error));
+      await upload.then((_) => console.log('upload complete')).catch((error) => console.error(error));
 
       const shownText = file.name;
       const downloadUrl: string = (await (await upload).ref.getDownloadURL()) as string;
-      await this.createClip(userId, shownText, storageFileName, downloadUrl);
+      await this.createClip(userId, shownText, previewFileUrl, storageFileName, downloadUrl);
 
       this.uploads = this.uploads.filter((up) => up !== clipUpload);
 
@@ -208,22 +225,111 @@ export class ClipzService {
     }
   }
 
+  private async createPreviewUrl(file: File): Promise<string> | null {
+    if (!file.type.startsWith('image/')) {
+      // Can only do images so far.
+      return null;
+    }
+
+    if (file.size > 30 * 1024 * 1024) {
+      // Don't process too large images. IE will just crash, proper browsers take forever
+      return null;
+    }
+
+    let srcDataUrl = null;
+    try {
+      srcDataUrl = await this.readSourceAsDataURL(file);
+    } catch (e) {
+      console.log('Could not read source as data URL. Not appending preview');
+      return null;
+    }
+
+    const image = new Image();
+    await this.loadImage(image, srcDataUrl);
+
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = previewWidth;
+    canvas.height = previewHeight;
+
+    const canvasAspectRatio = previewHeight / previewHeight;
+    const imageAspectRatio = image.width / image.height;
+    let xOffset = 0;
+    let yOffset = 0;
+    if (imageAspectRatio > canvasAspectRatio) {
+      const scaleFactor = image.height / canvas.height;
+      const scaledWidth = image.width / scaleFactor;
+      xOffset = (scaledWidth - previewWidth) / 2;
+    } else {
+      const scaleFactor = image.width / canvas.width;
+      const scaledHeight = image.height / scaleFactor;
+      yOffset = (scaledHeight - previewHeight) / 2;
+    }
+
+    context.drawImage(image, -xOffset, -yOffset,
+      previewWidth + 2 * xOffset, previewHeight + 2 * yOffset);
+    return canvas.toDataURL('image/jpg', 70);
+  }
+
+  private async loadImage(image: HTMLImageElement, srcDataUrl: any) {
+    image.src = srcDataUrl;
+
+    return new Promise(
+      (resolve, reject) => {
+        image.onload = () => {
+          resolve();
+        };
+        image.onerror = () => {
+          reject();
+        };
+      }
+    );
+  }
+
+  private async readSourceAsDataURL(file: File): Promise<string> {
+    const reader = new FileReader();
+
+    return new Promise(
+      (resolve, reject) => {
+        reader.onerror = () => {
+          console.log('ERROR');
+          reject('Couldn\'t read file');
+          reader.abort();
+        };
+
+        reader.onload = () => {
+          resolve(reader.result as string);
+        };
+
+        reader.readAsDataURL(file);
+      }
+    );
+  }
+
+  /**
+   * Create a string that can be used to store the file in Firebase from a file.
+   */
   private sanitizedFileName(file: File): string {
     // TODO: This is probably not fine.
     const fileName = file.name;
     return `${(new Date()).getMilliseconds()}_${fileName}`;
   }
 
+  /**
+   * Take all the given data and dump it into Firebase to make a new clip
+   */
   private async createClip(
     userId: string,
     text: string,
+    previewFileUrlString?: string | null,
     fileName?: string | null,
     downloadUrl?: string | null): Promise<firebase.database.Reference> {
 
     const timeStamp = firebase.database.ServerValue.TIMESTAMP;
     const reference = await this.firebaseDb
       .list(`/clipz/${userId}/clipz`)
-      .push({ text, time: timeStamp, file: downloadUrl ?? null, fileName });
+      .push({ text, time: timeStamp, previewFileUrlString, file: downloadUrl ?? null, fileName: fileName ?? null });
     return reference;
   }
 }

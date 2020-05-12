@@ -42,9 +42,17 @@
     margin: 20px;
     flex-direction: column;
     color: #666;
-    align-items: center;
-    font-size: xx-large;
+    align-items: stretch;
+    font-size: x-large;
     line-height: 3em;
+}
+
+.text-input {
+    align-self: stretch;
+}
+
+.input-paste-button {
+    align-self: flex-end;
 }
 
 .drag-drop-box {

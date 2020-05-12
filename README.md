@@ -15,7 +15,7 @@ Firebase cloud functions. To maintain the database and handle file uploads
 ### 3. `rules`
 Simple rule file that defines what clients can and can not do in the database.
 
-# Run you own (build / deploy)
+# Run your own (build / deploy)
 
 Easy enough, probably.
 
